@@ -108,6 +108,9 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (context) {
         final profileImage = profileCtrl.profileImage.value;
         final userImage = profileCtrl.user.value.profileImage;
+        final theme = Theme.of(context);
+        final primaryColor = theme.colorScheme.primary;
+        final onPrimaryColor = theme.colorScheme.onPrimary;
         return Padding(
           padding: const EdgeInsets.all(20),
           child: Column(
@@ -133,28 +136,46 @@ class _HomeScreenState extends State<HomeScreen> {
               ElevatedButton.icon(
                 icon: const Icon(Icons.camera_alt),
                 label: const Text("Take Photo"),
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: onPrimaryColor,
+                  backgroundColor: primaryColor,
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                ),
                 onPressed: () {
                   Navigator.of(context).pop();
                   profileCtrl.pickImage(ImageSource.camera);
                 },
               ),
+              const SizedBox(height: 12),
               ElevatedButton.icon(
                 icon: const Icon(Icons.photo_library),
                 label: const Text("Choose from Gallery"),
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: onPrimaryColor,
+                  backgroundColor: primaryColor,
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                ),
                 onPressed: () {
                   Navigator.of(context).pop();
                   profileCtrl.pickImage(ImageSource.gallery);
                 },
               ),
               if (profileImage != null || (userImage != null && userImage.isNotEmpty))
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.delete),
-                  label: const Text("Delete Image"),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    profileCtrl.removeImage();
-                  },
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.delete),
+                    label: const Text("Delete Image"),
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: theme.colorScheme.onError,
+                      backgroundColor: theme.colorScheme.error,
+                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      profileCtrl.removeImage();
+                    },
+                  ),
                 ),
             ],
           ),
@@ -257,9 +278,7 @@ class _HomeScreenState extends State<HomeScreen> {
           }),
           Obx(() {
             return IconButton(
-              icon: Icon(profileCtrl.darkMode.value
-                  ? Icons.light_mode_outlined
-                  : Icons.dark_mode_outlined),
+              icon: Icon(profileCtrl.darkMode.value ? Icons.light_mode_outlined : Icons.dark_mode_outlined),
               onPressed: () => profileCtrl.toggleDarkMode(!profileCtrl.darkMode.value),
             );
           }),
@@ -289,8 +308,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           const Text(
             'Africa at a Glance',
-            style: TextStyle(
-                fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           const SizedBox(height: 16),
           Row(
@@ -298,9 +316,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               _buildStatItem('$totalCountries', 'Countries', Icons.flag),
               _buildStatItem(
-                  '${(totalPopulation / 1000000000).toStringAsFixed(1)}B',
-                  'People',
-                  Icons.people),
+                  '${(totalPopulation / 1000000000).toStringAsFixed(1)}B', 'People', Icons.people),
               _buildStatItem(
                   '${(totalArea / 1000000).toStringAsFixed(1)}M', 'km² Area', Icons.public),
             ],
@@ -308,8 +324,7 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 8),
           const Text(
             'Discover the diversity of 54 nations',
-            style: TextStyle(
-                fontSize: 12, color: Colors.white70, fontStyle: FontStyle.italic),
+            style: TextStyle(fontSize: 12, color: Colors.white70, fontStyle: FontStyle.italic),
           )
         ],
       ),
@@ -322,10 +337,8 @@ class _HomeScreenState extends State<HomeScreen> {
         Icon(icon, size: 24, color: Colors.white),
         const SizedBox(height: 4),
         Text(value,
-            style: const TextStyle(
-                fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
-        Text(label,
-            style: const TextStyle(fontSize: 12, color: Colors.white70)),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.white70)),
       ],
     );
   }
@@ -349,8 +362,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Text(
                 getGreetingMessage(firstName),
-                style: const TextStyle(
-                    fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blueAccent),
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blueAccent),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -369,10 +381,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 12),
                     const Text(
                       'Ready to explore more?',
-                      style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green),
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
@@ -387,10 +396,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
                           foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20)),
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 24, vertical: 12)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12)),
                       child: const Text('Explore All Countries'),
                     ),
                   ],

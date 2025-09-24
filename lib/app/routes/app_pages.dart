@@ -1,13 +1,17 @@
 import 'package:get/get.dart';
+// Add aliases to avoid ambiguous import errors
+import '../screens/home_screen.dart' as home_screen;
+import '../screens/onboarding_screen.dart' as onboarding_screen;
+
 import '../screens/splash_screen.dart';
 import '../screens/signin_screen.dart';
 import '../screens/signup_screen.dart';
-import '../screens/home_screen.dart';
 import '../screens/explore_screen.dart';
 import '../screens/favorites_screen.dart';
 import '../screens/country_details_screen.dart';
 import '../screens/profile_screen.dart';
 import '../screens/notifications_screen.dart';
+
 import 'app_routes.dart';
 
 class AppPages {
@@ -26,7 +30,7 @@ class AppPages {
     ),
     GetPage(
       name: Routes.home,
-      page: () => const HomeScreen(),
+      page: () => const home_screen.HomeScreen(), // Use alias here
     ),
     GetPage(
       name: Routes.explore,
@@ -47,6 +51,10 @@ class AppPages {
     GetPage(
       name: Routes.notifications,
       page: () => NotificationsScreen(),
+    ),
+    GetPage(
+      name: Routes.onboarding,
+      page: () => const onboarding_screen.OnboardingScreen(), // Alias here
     ),
   ];
 }

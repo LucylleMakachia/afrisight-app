@@ -17,13 +17,20 @@ class AfrisightApp extends StatelessWidget {
 
   Future<String> _getInitialRoute() async {
     final prefs = await SharedPreferences.getInstance();
-    final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
-    final isFirstLaunch = prefs.getBool('isFirstLaunch') ?? true;
-    final hasUserData = prefs.containsKey('user_data');
+    final bool isFirstLaunch = prefs.getBool('isFirstLaunch') ?? true;
+    final bool isOnboarded = prefs.getBool('onboarded') ?? false;
+    final bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+    final bool hasUserData = prefs.containsKey('user_data');
 
+    // First launch always goes to splash
     if (isFirstLaunch) {
       await prefs.setBool('isFirstLaunch', false);
       return Routes.splash;
+    }
+
+    // From splash, app decides routing:
+    if (!isOnboarded) {
+      return Routes.onboarding; // Show onboarding if not done
     } else if (isLoggedIn || hasUserData) {
       if (!isLoggedIn && hasUserData) {
         await prefs.setBool('isLoggedIn', true);
@@ -40,6 +47,7 @@ class AfrisightApp extends StatelessWidget {
       future: _getInitialRoute(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
+          // Show a basic splash UI while deciding route
           return MaterialApp(
             debugShowCheckedModeBanner: false,
             home: Scaffold(

@@ -9,4 +9,5 @@ abstract class Routes {
   static const profile = '/profile';
   static const explore = '/explore';
   static const notifications = '/notifications';
+  static const onboarding = '/onboarding';
 }

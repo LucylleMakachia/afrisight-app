@@ -25,7 +25,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
 
     _fadeController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 7),
+      duration: const Duration(seconds: 3), 
     );
 
     _fadeAnimation = CurvedAnimation(
@@ -75,9 +75,12 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   Future<void> _checkSessionAndNavigate() async {
     await Future.delayed(const Duration(seconds: 3));
     final prefs = await SharedPreferences.getInstance();
+    final bool isOnboarded = prefs.getBool('onboarded') ?? false;
     final bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
 
-    if (isLoggedIn) {
+    if (!isOnboarded) {
+      Get.offNamed(Routes.onboarding); // Navigate to onboarding first
+    } else if (isLoggedIn) {
       Get.offNamed(Routes.home);
     } else {
       Get.offNamed(Routes.signin);
@@ -103,16 +106,13 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // logo image 
                 Image.asset(
                   'assets/images/afrisight_logo.png',
                   width: 220,
                   height: 220,
                   fit: BoxFit.contain,
                 ),
-
                 const SizedBox(height: 30),
-
                 ScaleTransition(
                   scale: _pulseAnimation,
                   child: CircularProgressIndicator(
