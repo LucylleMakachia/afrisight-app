@@ -343,72 +343,109 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildHomeContent() {
-    return Obx(() {
-      if (!controllersInitialized.value) {
-        return const Center(child: CircularProgressIndicator());
-      }
 
-      final ProfileController profileCtrl = Get.find<ProfileController>();
-      final user = profileCtrl.user.value;
-      final firstName = user.firstName.isNotEmpty ? user.firstName : "User";
-
-      return Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                getGreetingMessage(firstName),
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blueAccent),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              _buildQuickStats(),
-              const SizedBox(height: 48),
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                    color: Colors.green[50],
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.green[100]!)),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.explore, size: 40, color: Colors.green),
-                    const SizedBox(height: 12),
-                    const Text(
-                      'Ready to explore more?',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Discover all African countries and their unique cultures',
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () => Get.find<HomeScreenController>().changeIndex(1),
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12)),
-                      child: const Text('Explore All Countries'),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+Widget _buildSearchBarWithSuggestions() {
+  final CountryController countryController = Get.find<CountryController>();
+  return Column(
+    children: [
+      TextField(
+        controller: searchTextController,
+        decoration: InputDecoration(
+          hintText: 'Search countries by name...',
+          prefixIcon: const Icon(Icons.search),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+          filled: true,
+          fillColor: Colors.blue[50],
         ),
-      );
-    });
-  }
+        onChanged: (query) {
+          countryController.searchQuery.value = query;
+          countryController.applyFilters();
+        },
+      ),
+      Obx(() {
+        final query = countryController.searchQuery.value.trim().toLowerCase();
+        if (query.isEmpty) return const SizedBox.shrink();
+        final suggestions = countryController.countries
+            .where((country) => country.name.toLowerCase().contains(query))
+            .toList();
+        if (suggestions.isEmpty) {
+          return const Padding(
+            padding: EdgeInsets.only(top: 8),
+            child: Text('No countries found.', style: TextStyle(color: Colors.red)),
+          );
+        }
+        return Container(
+          constraints: const BoxConstraints(maxHeight: 200),
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: suggestions.length,
+            itemBuilder: (context, index) {
+              final country = suggestions[index];
+              return ListTile(
+                leading: Image.network(country.flagUrl, width: 32, height: 20, fit: BoxFit.cover),
+                title: Text(country.name),
+                subtitle: Text(country.capital),
+                onTap: () {
+                  FocusScope.of(context).unfocus();
+                  searchTextController.clear();
+                  countryController.searchQuery.value = '';
+                  countryController.applyFilters();
+                  Get.toNamed('/country-details', arguments: country);
+                },
+              );
+            },
+          ),
+        );
+      }),
+    ],
+  );
+}
+
+Widget _buildHomeContent() {
+  return Obx(() {
+    if (!controllersInitialized.value) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final ProfileController profileCtrl = Get.find<ProfileController>();
+    final user = profileCtrl.user.value;
+    final firstName = user.firstName.isNotEmpty ? user.firstName : "User";
+
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // App Logo
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Image.asset(
+                'assets/images/afrisight_logo.png',
+                height: 100,
+                width: 100,
+              ),
+            ),
+            // Greeting Message
+            Text(
+              getGreetingMessage(firstName),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blueAccent),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            // Search Bar with Suggestions
+            _buildSearchBarWithSuggestions(),
+            const SizedBox(height: 32),
+            // Africa at a Glance
+            _buildQuickStats(),
+          ],
+        ),
+      ),
+    );
+  });
+}
+
 
   @override
   Widget build(BuildContext context) {

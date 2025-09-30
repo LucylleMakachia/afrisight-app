@@ -93,7 +93,7 @@ class ProfileScreen extends StatelessWidget {
           Obx(() {
             final user = controller.user.value;
             return Text(
-              user.fullName.isNotEmpty ? user.fullName : 'Your Name',
+              user.fullName.isNotEmpty ? user.fullName : 'User',
               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             );
           }),

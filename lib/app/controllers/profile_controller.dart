@@ -52,8 +52,11 @@ class ProfileController extends GetxController {
         final userName = prefs.getString('userName');
         final userEmail = prefs.getString('userEmail');
         if (userName != null && userEmail != null) {
-          final nameParts = userName.split(' ');
-          final firstName = nameParts.isNotEmpty ? nameParts.first : '';
+          final effectiveName = userName.trim().isNotEmpty
+              ? userName
+              : userEmail.split('@')[0]; // fallback to email prefix
+          final nameParts = effectiveName.split(' ');
+          final firstName = nameParts.isNotEmpty ? nameParts.first : 'User';
           final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
           user.value = User(
             id: 'user_${DateTime.now().millisecondsSinceEpoch}',
