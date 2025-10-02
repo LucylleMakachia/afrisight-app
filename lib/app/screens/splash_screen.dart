@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get_storage/get_storage.dart';
 
 import '../routes/app_routes.dart';
 
@@ -74,16 +74,16 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
 
   Future<void> _checkSessionAndNavigate() async {
     await Future.delayed(const Duration(seconds: 3));
-    final prefs = await SharedPreferences.getInstance();
-    final bool isOnboarded = prefs.getBool('onboarded') ?? false;
-    final bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+    final box = GetStorage();
+    final bool isLoggedIn = box.read('isLoggedIn') ?? false;
+    final bool isOnboarded = box.read('onboarded') ?? false;
 
-    if (!isOnboarded) {
-      Get.offNamed(Routes.onboarding); // Navigate to onboarding first
-    } else if (isLoggedIn) {
+    if (isLoggedIn) {
       Get.offNamed(Routes.home);
-    } else {
+    } else if (isOnboarded) {
       Get.offNamed(Routes.signin);
+    } else {
+      Get.offNamed(Routes.onboarding);
     }
   }
 

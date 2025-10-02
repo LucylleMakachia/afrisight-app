@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get_storage/get_storage.dart';
 import '../routes/app_routes.dart';
 import '../controllers/profile_controller.dart';
 
@@ -15,22 +15,19 @@ class SignInScreen extends StatelessWidget {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
 
-    // Basic input validation
     if (email.isEmpty || password.isEmpty) {
       _showStyledToast("Email and password cannot be empty", isError: true);
       return;
     }
 
-    // Email format validation
     final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
     if (!emailRegex.hasMatch(email)) {
       _showStyledToast("Please enter a valid email address", isError: true);
       return;
     }
 
-    final prefs = await SharedPreferences.getInstance();
-    // Simulate registered users stored locally
-    final registeredUsers = prefs.getStringList('registeredEmails') ?? [];
+    final box = GetStorage();
+    final registeredUsers = box.read<List>('registeredEmails')?.cast<String>() ?? [];
 
     if (!registeredUsers.contains(email)) {
       _showStyledToast(
@@ -42,28 +39,22 @@ class SignInScreen extends StatelessWidget {
       return;
     }
 
-    // Get ProfileController - it should already be registered via AppBindings
     final ProfileController profileController = Get.find<ProfileController>();
     
-    // Extract username from email for the first name
-    final username = email.split('@').first;
+    await profileController.loadUserData();
     
-    // Update user profile with login information
-    profileController.user.update((val) {
-      val?.firstName = username;
-      val?.lastName = '';
-      val?.email = email;
-    });
+    if (profileController.user.value.email.isNotEmpty && 
+        profileController.user.value.email != email) {
+      _showStyledToast("User data mismatch. Please try again.", isError: true);
+      return;
+    }
+
+    box.write('isLoggedIn', true);
     
-    // Save updated user data
-    await profileController.saveUserData();
-
-    // Force immediate UI update by refreshing the entire user data
-    await profileController.refreshUserData();
-
-    // Save login status
-    await prefs.setBool('isLoggedIn', true);
-    _showStyledToast("Welcome back!", isError: false);
+    final userName = profileController.user.value.firstName.isNotEmpty 
+        ? profileController.user.value.firstName 
+        : "User";
+    _showStyledToast("Welcome back, $userName!", isError: false);
     
     Get.offNamed(Routes.home);
   }

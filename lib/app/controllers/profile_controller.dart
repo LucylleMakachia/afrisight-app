@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get_storage/get_storage.dart';
 
 import '../models/user.dart';
 
@@ -44,17 +44,18 @@ class ProfileController extends GetxController {
 
   Future<void> loadUserData() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final userJson = prefs.getString('user_data');
-      if (userJson != null && userJson.isNotEmpty) {
+      final box = GetStorage();
+      final userJson = box.read('user_data');
+      if (userJson != null && userJson.toString().isNotEmpty) {
         user.value = User.fromJson(userJson);
       } else {
-        final userName = prefs.getString('userName');
-        final userEmail = prefs.getString('userEmail');
+        // Legacy migration - only runs once for old users
+        final userName = box.read('userName');
+        final userEmail = box.read('userEmail');
         if (userName != null && userEmail != null) {
-          final effectiveName = userName.trim().isNotEmpty
-              ? userName
-              : userEmail.split('@')[0]; // fallback to email prefix
+          final effectiveName = userName.toString().trim().isNotEmpty
+              ? userName.toString()
+              : userEmail.toString().split('@')[0]; // fallback to email prefix only for legacy users
           final nameParts = effectiveName.split(' ');
           final firstName = nameParts.isNotEmpty ? nameParts.first : 'User';
           final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
@@ -62,14 +63,14 @@ class ProfileController extends GetxController {
             id: 'user_${DateTime.now().millisecondsSinceEpoch}',
             firstName: firstName,
             lastName: lastName,
-            email: userEmail,
+            email: userEmail.toString(),
             phoneNumber: '',
             address: '',
             profileImage: null,
           );
           await saveUserData();
-          await prefs.remove('userName');
-          await prefs.remove('userEmail');
+          box.remove('userName');
+          box.remove('userEmail');
         }
       }
       nameController.text = user.value.fullName;
@@ -84,9 +85,9 @@ class ProfileController extends GetxController {
 
   Future<void> loadAppSettings() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      darkMode.value = prefs.getBool('dark_mode') ?? false;
-      notificationsEnabled.value = prefs.getBool('notifications_enabled') ?? true;
+      final box = GetStorage();
+      darkMode.value = box.read('dark_mode') ?? false;
+      notificationsEnabled.value = box.read('notifications_enabled') ?? true;
       if (darkMode.value) {
         Get.changeThemeMode(ThemeMode.dark);
       }
@@ -97,8 +98,8 @@ class ProfileController extends GetxController {
 
   Future<void> saveUserData() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('user_data', user.value.toJson());
+      final box = GetStorage();
+      box.write('user_data', user.value.toJson());
     } catch (e) {
       debugPrint('Error saving user data: $e');
       Get.snackbar('Error', 'Failed to save user data');
@@ -107,9 +108,9 @@ class ProfileController extends GetxController {
 
   Future<void> saveAppSettings() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('dark_mode', darkMode.value);
-      await prefs.setBool('notifications_enabled', notificationsEnabled.value);
+      final box = GetStorage();
+      box.write('dark_mode', darkMode.value);
+      box.write('notifications_enabled', notificationsEnabled.value);
     } catch (e) {
       debugPrint('Error saving app settings: $e');
     }
@@ -188,8 +189,8 @@ class ProfileController extends GetxController {
 
   Future<void> clearLoginStatus() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('isLoggedIn', false);
+      final box = GetStorage();
+      box.write('isLoggedIn', false);
       Get.snackbar('Logout', 'User logged out successfully', snackPosition: SnackPosition.BOTTOM);
     } catch (e) {
       debugPrint('Error clearing login status: $e');

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
-import '../routes/app_routes.dart'; // Import Routes for named routes
+import '../routes/app_routes.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -57,7 +57,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _completeOnboarding() {
     final box = GetStorage();
     box.write('onboarded', true);
-    // Navigate to signin screen removing onboarding from stack
     Get.offNamed(Routes.signin);
   }
 
@@ -78,7 +77,50 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset(slides[index]["image"]!, height: 300),
+                SizedBox(
+                  height: 300,
+                  child: Image.asset(
+                    slides[index]["image"]!,
+                    height: 300,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      debugPrint('Failed to load image: ${slides[index]["image"]}');
+                      debugPrint('Error: $error');
+                      debugPrint('StackTrace: $stackTrace');
+                      return Container(
+                        height: 300,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.image_not_supported, 
+                                size: 80, 
+                                color: Colors.grey[400]),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Image not available',
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              slides[index]["image"]!,
+                              style: TextStyle(
+                                color: Colors.grey[500],
+                                fontSize: 10,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
                 const SizedBox(height: 24),
                 Text(
                   slides[index]["title"]!,

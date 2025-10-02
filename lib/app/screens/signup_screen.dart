@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get_storage/get_storage.dart';
 import '../routes/app_routes.dart';
 import '../controllers/profile_controller.dart';
 
@@ -78,8 +78,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
       _isLoading = true;
     });
 
-    final prefs = await SharedPreferences.getInstance();
-    List<String> registeredEmails = prefs.getStringList('registeredEmails') ?? [];
+    final box = GetStorage();
+    List<String> registeredEmails = box.read<List>('registeredEmails')?.cast<String>() ?? [];
 
     if (registeredEmails.contains(email)) {
       setState(() {
@@ -106,8 +106,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     await profileController.refreshUserData();
 
     registeredEmails.add(email);
-    await prefs.setStringList('registeredEmails', registeredEmails);
-    await prefs.setBool('isLoggedIn', true);
+    box.write('registeredEmails', registeredEmails);
+    box.write('isLoggedIn', true);
 
     setState(() {
       _isLoading = false;
